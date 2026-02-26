@@ -14,6 +14,8 @@ class TaskController extends Controller
 {
     public function store(StoreTaskRequest $request, Project $project): JsonResponse
     {
+        abort_if($project->user_id !== auth()->id(), 404);
+
         $task = $project->tasks()->create($request->validated());
 
         return response()->json(new TaskResource($task), 201);
@@ -21,7 +23,9 @@ class TaskController extends Controller
 
     public function update(UpdateTaskRequest $request, Project $project, Task $task): JsonResponse
     {
+        abort_if($project->user_id !== auth()->id(), 404);
         abort_if($task->project_id !== $project->id, 404);
+
         $task->update($request->validated());
 
         return response()->json(new TaskResource($task->fresh()));
@@ -29,7 +33,9 @@ class TaskController extends Controller
 
     public function destroy(Project $project, Task $task): JsonResponse
     {
+        abort_if($project->user_id !== auth()->id(), 404);
         abort_if($task->project_id !== $project->id, 404);
+
         $this->authorize('delete', $task);
         $task->delete();
 
